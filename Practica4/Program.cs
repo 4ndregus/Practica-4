@@ -8,17 +8,17 @@ using System.Diagnostics;
 using System.IO;
 using Practica4.Estructura;
 using Practica4.Modelo;
+using Practica4.Encriptación;
 
 namespace Practica4.Helpers
 {
     internal class Program
     {
         public static AVL<Persona> AVLDpi;
-        //public static Compresion compresion = new Compresion();
-        public static List<List<string>> listaCodificados = new List<List<string>>();
+        public static Encriptar encriptar = new Encriptar();
         static void Main(string[] args)
         {
-            string ubicacionArchivo = "C:\\Users\\agust\\OneDrive - Universidad Rafael Landivar\\URL\\6) Segundo Ciclo 2022\\Estructura de datos II\\Practica-3\\Practica3\\input.csv";
+            string ubicacionArchivo = "C:\\Users\\agust\\OneDrive - Universidad Rafael Landivar\\URL\\6) Segundo Ciclo 2022\\Estructura de datos II\\Practica-4\\Practica4\\input.csv";
             StreamReader archivo = new StreamReader(ubicacionArchivo);
             string linea;
 
@@ -33,15 +33,15 @@ namespace Practica4.Helpers
                     Persona nuevaPersona = JsonSerializer.Deserialize<Persona>(json);
 
                     int i = 0;
-                    //Buscar las cartas para cada persona
-                    DirectoryInfo dir = new DirectoryInfo(@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-3\Practica3\inputs");
-                    foreach (var value in dir.GetFiles($"REC-{nuevaPersona.dpi}-?.txt"))
+                    //Buscar las conversaciones para cada persona
+                    DirectoryInfo dir = new DirectoryInfo(@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\inputs");
+                    foreach (var value in dir.GetFiles($"CONV-{nuevaPersona.dpi}-?.txt"))
                     {
-                        nuevaPersona.cartas.Add(i + ": " + value.Name);
+                        nuevaPersona.conversaciones.Add(i + ": " + value.Name);
                         i++;
                     }
 
-                    //A cada persona se le inserta un arreglo de todas las cartas que se encontraron
+                    //A cada persona se le inserta un arreglo de todas las conversaciones que se encontraron
                     AVLDpi.insertar(nuevaPersona, nuevaPersona.CompararDpi);
                 }
                 if (fila[0] == "DELETE")
@@ -57,11 +57,11 @@ namespace Practica4.Helpers
                     Nodo<Persona> nuevoNodo = new Nodo<Persona>(nuevaPersona);
 
                     int i = 0;
-                    //Buscar las cartas para cada persona
-                    DirectoryInfo dir = new DirectoryInfo(@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-3\Practica3\inputs");
-                    foreach (var value in dir.GetFiles($"REC-{nuevaPersona.dpi}-?.txt"))
+                    //Buscar las conversaciones para cada persona
+                    DirectoryInfo dir = new DirectoryInfo(@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\inputs");
+                    foreach (var value in dir.GetFiles($"CONV-{nuevaPersona.dpi}-?.txt"))
                     {
-                        nuevaPersona.cartas.Add(i + ": " + value.Name);
+                        nuevaPersona.conversaciones.Add(i + ": " + value.Name);
                         i++;
                     }
 
@@ -125,6 +125,128 @@ namespace Practica4.Helpers
                     Console.Write("Selecciona opción: ");
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     opcion = int.Parse(Console.ReadLine());
+
+                    if (opcion == 1) //Cifrar conversaciones
+                    {
+                        string clave;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write("Ingresa clave de cifrado: ");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        clave = Console.ReadLine();
+
+                        //Buscar las conversaciones para cada persona
+                        DirectoryInfo dir = new DirectoryInfo(@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\inputs");
+                        foreach (var item in dir.GetFiles($"CONV-{dpi}-?.txt"))
+                        {
+                            string cifrado = "";
+
+                            string textfile = $@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\inputs\{item.Name}";
+                            string guardar = $@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\encryption\{item.Name}";
+
+                            //Extraer texto del archivo
+                            string text = "";
+                            if (File.Exists(textfile)) { text = File.ReadAllText(textfile); }
+
+                            //Cifrar la conversación
+                            cifrado = encriptar.cifrar(clave, text);
+
+                            File.WriteAllText(guardar, cifrado);
+
+                        }
+
+                        Console.Clear();
+                        goto Menu;
+
+                    }
+                    else if(opcion == 2) //Descifrar las conversaciones
+                    {
+                        string clave;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write("Ingresa clave de cifrado: ");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        clave = Console.ReadLine();
+
+                        //Buscar las conversaciones para cada persona
+                        DirectoryInfo dir = new DirectoryInfo(@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\encryption");
+                        foreach (var item in dir.GetFiles($"CONV-{dpi}-?.txt"))
+                        {
+                            string descifrado = "";
+
+                            string textfile = $@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\encryption\{item.Name}";
+                            string guardar = $@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\decryption\{item.Name}";
+
+                            //Extraer texto del archivo
+                            string text = "";
+                            if (File.Exists(textfile)) { text = File.ReadAllText(textfile); }
+
+                            //Cifrar la conversación
+                            descifrado = encriptar.descifrar(clave, text);
+
+                            File.WriteAllText(guardar, descifrado);
+
+                        }
+
+                        Console.Clear();
+                        goto Menu;
+
+                    }
+                    else if(opcion == 3) //Ver conversaciones cifradas
+                    {
+                    pedirConv:
+                        string conversacion = "";
+                        int opcConv;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write("Selecciona conversación: ");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        opcConv = int.Parse(Console.ReadLine());
+
+                        if (opcConv > AVLDpi.listaBusqueda[0].conversaciones.Count - 1)
+                        {
+                            Console.WriteLine("Selecciona una conversación dentro del rango");
+                            goto pedirConv;
+                        }
+                        conversacion = AVLDpi.listaBusqueda[0].conversaciones[opcConv].Substring(AVLDpi.listaBusqueda[0].conversaciones[opcConv].IndexOf(":") + 2);
+                        string ruta = $@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\encryption\{conversacion}";
+                        Process.Start("explorer.exe", ruta);
+                        Console.Clear();
+                        goto Menu;
+
+                    }
+                    else if(opcion == 4) //Ver conversaciones descifradas
+                    {
+                    pedirConv:
+                        string conversacion = "";
+                        int opcConv;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write("Selecciona conversación: ");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        opcConv = int.Parse(Console.ReadLine());
+
+                        if (opcConv > AVLDpi.listaBusqueda[0].conversaciones.Count - 1)
+                        {
+                            Console.WriteLine("Selecciona una conversación dentro del rango");
+                            goto pedirConv;
+                        }
+                        conversacion = AVLDpi.listaBusqueda[0].conversaciones[opcConv].Substring(AVLDpi.listaBusqueda[0].conversaciones[opcConv].IndexOf(":") + 2);
+                        string ruta = $@"C:\Users\agust\OneDrive - Universidad Rafael Landivar\URL\6) Segundo Ciclo 2022\Estructura de datos II\Practica-4\Practica4\decryption\{conversacion}";
+                        Process.Start("explorer.exe", ruta);
+                        Console.Clear();
+                        goto Menu;
+
+                    }
+                    else if (opcion == 5) //Seguir buscando
+                    {
+                        Buscar();
+                    }
+                    else if (opcion == 6) //Salir
+                    {
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Opción no válida");
+                        goto Menu;
+                    }
                 }
                 catch (Exception)
                 {

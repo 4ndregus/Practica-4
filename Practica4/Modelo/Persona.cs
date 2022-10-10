@@ -14,13 +14,7 @@ namespace Practica4.Modelo
         public string datebirth { get; set; }
         public string address { get; set; }
         public string[] companies { get; set; }
-        public List<string> cartas { get; set; } = new List<string>();
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-        public List<List<string>[]> codificados { get; private set; } = new List<List<string>[]>();
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-        public List<List<string>[]> entradas { get; private set; } = new List<List<string>[]>();
+        public List<string> conversaciones { get; set; } = new List<string>();
 
         public Persona(string name, string dpi, string datebirth, string address)
         {
